@@ -2,409 +2,654 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<title>Snake Neon • Mobile</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+<title>Snake Neon</title>
 <style>
-    :root {
-        color-scheme: dark;
-    }
-    * {
-        -webkit-tap-highlight-color: transparent;
-        touch-action: none;
-        user-select: none;
-    }
-    body {
-        font-family: 'Space Grotesk', system-ui, sans-serif;
-        background: radial-gradient(1200px 800px at 50% -10%, #0a0a18 0%, #000000 60%);
-        overscroll-behavior: none;
-    }
-   .font-display { font-family: 'Orbitron', monospace; }
-   .neon-text-cyan {
-        text-shadow: 0 0 6px rgba(0,255,255,.9), 0 0 18px rgba(0,255,255,.6), 0 0 32px rgba(0,255,255,.3);
-    }
-   .neon-text-magenta {
-        text-shadow: 0 0 6px rgba(255,0,255,.9), 0 0 18px rgba(255,0,255,.6), 0 0 32px rgba(255,0,255,.3);
-    }
-   .neon-panel {
-        background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
-        border: 1px solid rgba(0,255,255,.25);
-        box-shadow: inset 0 0 30px rgba(0,255,255,.05), 0 0 40px rgba(0,255,255,.08);
-        backdrop-filter: blur(12px);
-    }
-   .btn-neon {
-        position: relative;
-        background: linear-gradient(180deg, rgba(0,255,255,.15), rgba(0,255,255,.05));
-        border: 1px solid rgba(0,255,255,.6);
-        box-shadow: 0 0 12px rgba(0,255,255,.5), inset 0 0 12px rgba(0,255,255,.2);
-        transition: transform.15s ease, box-shadow.15s ease;
-    }
-   .btn-neon:active {
-        transform: scale(.96);
-        box-shadow: 0 0 20px rgba(0,255,255,.8), inset 0 0 16px rgba(0,255,255,.3);
-    }
-   .control-btn {
-        width: 78px;
-        height: 78px;
-        border-radius: 24px;
-        background: radial-gradient(circle at 30% 30%, rgba(0,255,255,.25), rgba(0,255,255,.05));
-        border: 1.5px solid rgba(0,255,255,.7);
-        box-shadow: 0 0 18px rgba(0,255,255,.45), inset 0 0 14px rgba(0,255,255,.2);
-        display: grid;
-        place-items: center;
-        transition: transform.1s ease;
-    }
-   .control-btn:active { transform: scale(.94); }
-   .scanlines::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0px, transparent 2px, transparent 4px);
-        mix-blend-mode: overlay;
-        pointer-events: none;
-    }
-    #game {
-        border-radius: 24px;
-        box-shadow: 0 0 0 2px rgba(0,255,255,.3), 0 0 60px rgba(0,255,255,.15), inset 0 0 40px rgba(0,0,0,.9);
-    }
-   .slow-vignette {
-        position: absolute;
-        inset: 0;
-        border-radius: 24px;
-        pointer-events: none;
-        box-shadow: inset 0 0 120px rgba(56,189,248,.35);
-        opacity: 0;
-        transition: opacity.3s ease;
-    }
-   .slow-active.slow-vignette { opacity: 1; }
-   .power-pulse {
-        animation: pulse 1s ease-in-out infinite;
-    }
-    @keyframes pulse {
-        0%,100% { transform: scale(1); opacity: 1; }
-        50% { transform: scale(1.08); opacity:.85; }
-    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    height: 100%;
+    margin: 0;
+    background: radial-gradient(1200px 800px at 50% -10%, #0a0f1e 0%, #05060a 55%, #020305 100%);
+    color: #e6faff;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+    overscroll-behavior: none;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+  }
+ .wrap {
+    width: 100%;
+    max-width: 560px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+ .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(0,255,255,0.15);
+    box-shadow: 0 0 20px rgba(0,255,255,0.08) inset;
+  }
+ .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+ .stat.label {
+    font-size: 11px;
+    letter-spacing:.12em;
+    text-transform: uppercase;
+    color: rgba(180,240,255,.7);
+  }
+ .stat.value {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+    color: #aaffff;
+    text-shadow: 0 0 10px rgba(0,255,255,.8);
+  }
+ .board {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 20px;
+    padding: 10px;
+    background: linear-gradient(180deg, rgba(0,255,255,.08), rgba(255,0,255,.05));
+    box-shadow:
+      0 0 0 2px rgba(0,255,255,.35),
+      0 0 30px rgba(0,255,255,.25),
+      0 0 80px rgba(255,0,255,.15) inset;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+    background: #02040a;
+    touch-action: none;
+  }
+ .controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+ .btn {
+    user-select: none;
+    -webkit-user-select: none;
+    appearance: none;
+    border: none;
+    border-radius: 16px;
+    padding: 18px 0;
+    font-size: 18px;
+    font-weight: 800;
+    letter-spacing:.08em;
+    text-transform: uppercase;
+    color: #001214;
+    background: linear-gradient(180deg, #00ffff, #00d6d6);
+    box-shadow:
+      0 0 0 2px rgba(0,255,255,.6),
+      0 0 25px rgba(0,255,255,.7),
+      0 8px 20px rgba(0,0,0,.5);
+    transition: transform.06s ease, filter.15s ease;
+  }
+ .btn:active {
+    transform: translateY(2px) scale(.98);
+    filter: brightness(.95);
+  }
+ .btn span {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+ .overlay {
+    position: absolute;
+    inset: 10px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(600px 400px at 50% 0%, rgba(0,0,0,.4), rgba(0,0,0,.85));
+    backdrop-filter: blur(6px);
+    z-index: 10;
+  }
+ .card {
+    text-align: center;
+    padding: 28px 24px;
+    border-radius: 20px;
+    background: rgba(5,10,20,.85);
+    border: 1px solid rgba(0,255,255,.3);
+    box-shadow: 0 0 40px rgba(0,255,255,.2), inset 0 0 30px rgba(255,0,255,.08);
+    max-width: 90%;
+  }
+ .title {
+    font-size: 42px;
+    font-weight: 900;
+    letter-spacing:.02em;
+    margin: 0 0 8px;
+    color: #fff;
+    text-shadow:
+      0 0 12px rgba(0,255,255,.9),
+      0 0 30px rgba(0,255,255,.6);
+  }
+ .subtitle {
+    margin: 0 0 20px;
+    color: rgba(200,240,255,.8);
+    font-size: 14px;
+  }
+ .play {
+    cursor: pointer;
+    border: none;
+    border-radius: 14px;
+    padding: 16px 28px;
+    font-size: 20px;
+    font-weight: 900;
+    letter-spacing:.1em;
+    text-transform: uppercase;
+    color: #001014;
+    background: linear-gradient(180deg, #ff00ff, #d600d6);
+    box-shadow:
+      0 0 0 2px rgba(255,0,255,.6),
+      0 0 30px rgba(255,0,255,.7),
+      0 10px 30px rgba(0,0,0,.6);
+    transition: transform.08s ease;
+  }
+ .play:active { transform: scale(.97); }
+ .hint {
+    margin-top: 14px;
+    font-size: 12px;
+    color: rgba(150,200,220,.7);
+  }
+ .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: rgba(0,136,255,.15);
+    border: 1px solid rgba(0,136,255,.5);
+    color: #8fd4ff;
+    font-size: 11px;
+    letter-spacing:.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    box-shadow: 0 0 15px rgba(0,136,255,.4);
+  }
+ .power {
+    position: absolute;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: rgba(0,136,255,.15);
+    border: 1px solid rgba(0,136,255,.6);
+    color: #aaddff;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing:.08em;
+    text-transform: uppercase;
+    box-shadow: 0 0 20px rgba(0,136,255,.6);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity.2s ease;
+    z-index: 5;
+  }
+ .power.show { opacity: 1; }
+ .hide { display: none; }
 </style>
 </head>
-<body class="min-h-screen bg-black text-white flex flex-col items-center justify-center p-3 sm:p-6">
-    <div class="w-full max-w-[520px] flex flex-col items-center gap-3">
-        <!-- Header -->
-        <header class="w-full flex items-center justify-between">
-            <div class="flex items-baseline gap-3">
-                <h1 class="font-display font-black text-[28px] leading-none tracking-wider neon-text-cyan">SNAKE</h1>
-                <span class="font-display text-[28px] leading-none tracking-wider neon-text-magenta">NEON</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <div class="neon-panel px-3 py-1.5 rounded-xl text-center min-w-[84px]">
-                    <div class="text-[10px] uppercase tracking-widest text-cyan-300/80">Score</div>
-                    <div id="score" class="font-display text-xl leading-none">0</div>
-                </div>
-                <div class="neon-panel px-3 py-1.5 rounded-xl text-center min-w-[84px]">
-                    <div class="text-[10px] uppercase tracking-widest text-cyan-300/80">Best</div>
-                    <div id="highScore" class="font-display text-xl leading-none text-cyan-200">0</div>
-                </div>
-            </div>
-        </header>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div class="stat">
+      <div class="label">Score</div>
+      <div class="value" id="score">0</div>
+    </div>
+    <div class="stat" style="text-align:right">
+      <div class="label">Best</div>
+      <div class="value" id="best">0</div>
+    </div>
+  </div>
 
-        <!-- Game Canvas Wrapper -->
-        <div id="gameWrapper" class="relative w-full aspect-square max-w-[520px] scanlines">
-            <canvas id="game" class="w-full h-full block bg-[#020208]"></canvas>
-            <div class="slow-vignette"></div>
+  <div class="board">
+    <div class="power" id="powerBadge">SLOW • 5.0s</div>
+    <canvas id="game"></canvas>
 
-            <!-- Top HUD -->
-            <div class="absolute top-3 left-3 right-3 flex justify-between items-center pointer-events-none">
-                <div id="slowBadge" class="hidden items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-500/15 border border-sky-400/60 text-sky-200 text-xs font-medium backdrop-blur">
-                    <span class="w-2 h-2 rounded-full bg-sky-400 animate-pulse"></span>
-                    SLOW-MO
-                </div>
-                <div class="ml-auto flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/40 border border-white/10 text-[11px] uppercase tracking-wider">
-                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                    <span id="fps">60 FPS</span>
-                </div>
-            </div>
+    <div class="overlay" id="startOverlay">
+      <div class="card">
+        <div class="badge">Neon Edition</div>
+        <h1 class="title">SNAKE</h1>
+        <p class="subtitle">Swipe to steer • LEFT / RIGHT to turn<br>Food = magenta • Power = blue slow-mo</p>
+        <button class="play" id="playBtn">PLAY</button>
+        <div class="hint">No reverse • Walls are lethal</div>
+      </div>
+    </div>
 
-            <!-- Start Screen -->
-            <div id="startScreen" class="absolute inset-0 flex flex-col items-center justify-center text-center p-8 rounded-[24px] bg-gradient-to-b from-black/85 via-[#020208]/90 to-black/95 backdrop-blur-sm">
-                <div class="mb-4">
-                    <h2 class="font-display font-black text-4xl neon-text-cyan tracking-wider">READY?</h2>
-                    <p class="mt-2 text-cyan-100/80 text-sm max-w-[320px]">Eat magenta orbs. Avoid walls & yourself. Grab blue pill for bullet-time.</p>
-                </div>
-                <div class="neon-panel rounded-2xl p-4 w-full max-w-[340px] text-left space-y-2 text-sm">
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-cyan-400 shadow-[0_0_10px_rgba(0,255,255,.9)]"></span>
-                        <span>Swipe to steer • Tap arrows to turn</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-fuchsia-400 shadow-[0_0_10px_rgba(255,0,255,.9)]"></span>
-                        <span>Food = +10 • Grow longer</span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-sky-400 shadow-[0_0_10px_rgba(56,189,248,.9)]"></span>
-                        <span>Blue pill = 5s slow-mo</span>
-                    </div>
-                </div>
-                <button id="playBtn" class="btn-neon mt-6 px-10 py-3 rounded-2xl font-display font-bold tracking-widest text-lg">PLAY</button>
-                <p class="mt-3 text-[11px] uppercase tracking-[.2em] text-white/40">Best experienced with sound off</p>
-            </div>
+    <div class="overlay hide" id="gameOverOverlay">
+      <div class="card">
+        <div class="badge">Game Over</div>
+        <h1 class="title" id="finalScore">0</h1>
+        <p class="subtitle">Best: <span id="finalBest">0</span></p>
+        <button class="play" id="restartBtn">RESTART</button>
+        <div class="hint">Swipe or use buttons to play again</div>
+      </div>
+    </div>
+  </div>
 
-            <!-- Game Over Screen -->
-            <div id="gameOverScreen" class="absolute inset-0 hidden flex-col items-center justify-center text-center p-8 rounded-[24px] bg-gradient-to-b from-black/90 via-[#07000a]/95 to-black/95 backdrop-blur-sm">
-                <h2 class="font-display font-black text-5xl neon-text-magenta tracking-wider">GAME OVER</h2>
-                <div class="mt-4 neon-panel rounded-2xl px-6 py-4">
-                    <div class="text-xs uppercase tracking-widest text-white/60">Final Score</div>
-                    <div id="finalScore" class="font-display text-5xl leading-none mt-1 neon-text-cyan">0</div>
-                    <div id="newBest" class="hidden mt-2 text-sm font-medium text-amber-300">✨ NEW HIGH SCORE ✨</div>
-                </div>
-                <div class="flex gap-3 mt-6">
-                    <button id="restartBtn" class="btn-neon px-8 py-3 rounded-2xl font-display font-bold tracking-wider">RESTART</button>
-                    <button id="menuBtn" class="px-8 py-3 rounded-2xl font-display font-bold tracking-wider border border-white/15 bg-white/5 hover:bg-white/10 transition">MENU</button>
-                </div>
-            </div>
-        </div>
+  <div class="controls">
+    <button class="btn" id="leftBtn"><span>⟲ LEFT</span></button>
+    <button class="btn" id="rightBtn"><span>RIGHT ⟳</span></button>
+  </div>
+</div>
 
-        <!-- Controls -->
-        <div class="w-full flex items-center justify-between mt-1 px-2">
-            <button id="leftBtn" class="control-btn" aria-label="Turn Left">
-                <svg width="36" height="36" viewBox="0 0 24 24" fill="none">
-                    <path d="M14 7l-5 5 5 5" stroke="#67e8f9" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="filter: drop-shadow(0 0 8px rgba(0,255,255,.8))"/>
-                </svg>
-            </button>
-            <div class="text-center">
-                <div class="text-[11px] uppercase tracking-widest text-white/50">
-         function step() {
-        dir = nextDir;
-        const head = { x: snake[0].x + dir.x, y: snake[0].y + dir.y };
+<script>
+(function(){
+  'use strict';
 
-        // Wall collision
-        if (head.x < 0 || head.x >= GRID || head.y < 0 || head.y >= GRID) {
-            gameOver(); return;
+  const GRID = 24;
+  const CELL_BORDER = 1;
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const bestEl = document.getElementById('best');
+  const startOverlay = document.getElementById('startOverlay');
+  const gameOverOverlay = document.getElementById('gameOverOverlay');
+  const playBtn = document.getElementById('playBtn');
+  const restartBtn = document.getElementById('restartBtn');
+  const finalScoreEl = document.getElementById('finalScore');
+  const finalBestEl = document.getElementById('finalBest');
+  const leftBtn = document.getElementById('leftBtn');
+  const rightBtn = document.getElementById('rightBtn');
+  const powerBadge = document.getElementById('powerBadge');
+
+  let dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+  let size = 0;
+  let cell = 0;
+  let lastTime = 0;
+  let acc = 0;
+
+  const state = {
+    running: false,
+    over: false,
+    dir: {x:1, y:0},
+    nextDir: {x:1, y:0},
+    snake: [],
+    food: null,
+    power: null,
+    score: 0,
+    best: parseInt(localStorage.getItem('snake_neon_best')||'0',10),
+    speed: 8,
+    slowTimer: 0
+  };
+  bestEl.textContent = state.best;
+
+  function resize(){
+    const rect = canvas.getBoundingClientRect();
+    size = Math.floor(rect.width);
+    canvas.width = size * dpr;
+    canvas.height = size * dpr;
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    cell = size / GRID;
+  }
+
+  function resetGame(){
+    state.snake = [];
+    const startX = Math.floor(GRID/3);
+    const startY = Math.floor(GRID/2);
+    for(let i=0;i<4;i++){
+      state.snake.push({x:startX - i, y:startY});
+    }
+    state.dir = {x:1, y:0};
+    state.nextDir = {x:1, y:0};
+    state.score = 0;
+    state.speed = 8;
+    state.slowTimer = 0;
+    state.power = null;
+    placeFood();
+    updateScore();
+    acc = 0;
+    lastTime = performance.now();
+  }
+
+  function startGame(){
+    resetGame();
+    state.running = true;
+    state.over = false;
+    startOverlay.classList.add('hide');
+    gameOverOverlay.classList.add('hide');
+    powerBadge.classList.remove('show');
+  }
+
+  function gameOver(){
+    state.running = false;
+    state.over = true;
+    if(state.score > state.best){
+      state.best = state.score;
+      localStorage.setItem('snake_neon_best', state.best);
+      bestEl.textContent = state.best;
+    }
+    finalScoreEl.textContent = state.score;
+    finalBestEl.textContent = state.best;
+    gameOverOverlay.classList.remove('hide');
+  }
+
+  function updateScore(){
+    scoreEl.textContent = state.score;
+  }
+
+  function placeFood(){
+    let x,y,ok;
+    do{
+      ok = true;
+      x = Math.floor(Math.random()*GRID);
+      y = Math.floor(Math.random()*GRID);
+      for(const s of state.snake){
+        if(s.x===x && s.y===y){ ok=false; break; }
+      }
+      if(state.power && state.power.x===x && state.power.y===y) ok=false;
+    }while(!ok);
+    state.food = {x,y};
+  }
+
+  function maybeSpawnPower(){
+    if(state.power) return;
+    if(Math.random() < 0.25){
+      let x,y,ok,attempts=0;
+      do{
+        ok = true;
+        x = Math.floor(Math.random()*GRID);
+        y = Math.floor(Math.random()*GRID);
+        attempts++;
+        if(attempts>200) return;
+        for(const s of state.snake){
+          if(s.x===x && s.y===y){ ok=false; break; }
         }
-        // Self collision
-        if (snake.some(s => s.x === head.x && s.y === head.y)) {
-            gameOver(); return;
-        }
+        if(state.food.x===x && state.food.y===y) ok=false;
+      }while(!ok);
+      state.power = {x,y, life: 8000};
+    }
+  }
 
-        snake.unshift(head);
+  function setDir(nx,ny){
+    if(nx === -state.dir.x && ny === -state.dir.y) return;
+    if(nx === state.dir.x && ny === state.dir.y) return;
+    state.nextDir = {x:nx, y:ny};
+  }
 
-        let ate = false;
-        if (food && head.x === food.x && head.y === food.y) {
-            ate = true;
-            score += 10;
-            scoreEl.textContent = score;
-            spawnFood();
-        }
+  function turnLeft(){
+    const dx = state.dir.x, dy = state.dir.y;
+    setDir(dy, -dx);
+  }
 
-        if (powerUp && head.x === powerUp.x && head.y === powerUp.y) {
-            slowMoUntil = performance.now() + 5000;
-            powerUp = null;
-            gameWrapper.classList.add('slow-active');
-            slowBadge.classList.remove('hidden');
-            slowBadge.classList.add('flex');
-        }
+  function turnRight(){
+    const dx = state.dir.x, dy = state.dir.y;
+    setDir(-dy, dx);
+  }
 
-        if (!ate) snake.pop();
+  function step(){
+    state.dir = state.nextDir;
+
+    const head = state.snake[0];
+    const nx = head.x + state.dir.x;
+    const ny = head.y + state.dir.y;
+
+    if(nx < 0 || ny < 0 || nx >= GRID || ny >= GRID){
+      gameOver();
+      return;
+    }
+    for(const s of state.snake){
+      if(s.x===nx && s.y===ny){
+        gameOver();
+        return;
+      }
     }
 
-    function drawRoundedRect(x, y, w, h, r) {
-        ctx.beginPath();
-        ctx.moveTo(x + r, y);
-        ctx.arcTo(x + w, y, x + w, y + h, r);
-        ctx.arcTo(x + w, y + h, x, y + h, r);
-        ctx.arcTo(x, y + h, x, y, r);
-        ctx.arcTo(x, y, x + w, y, r);
-        ctx.closePath();
+    state.snake.unshift({x:nx, y:ny});
+
+    let ate = false;
+    if(state.food && nx===state.food.x && ny===state.food.y){
+      ate = true;
+      state.score += 10;
+      updateScore();
+      placeFood();
+      maybeSpawnPower();
     }
 
-    function draw() {
-        const size = canvas.width / dpr;
-        ctx.clearRect(0, 0, size, size);
-
-        // Background grid glow
-        ctx.save();
-        ctx.globalAlpha = 0.07;
-        ctx.strokeStyle = '#0ff';
-        ctx.lineWidth = 1;
-        for (let i = 0; i <= GRID; i++) {
-            const p = i * cell;
-            ctx.beginPath();
-            ctx.moveTo(p, 0);
-            ctx.lineTo(p, size);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(0, p);
-            ctx.lineTo(size, p);
-            ctx.stroke();
-        }
-        ctx.restore();
-
-        // Walls neon
-        ctx.save();
-        ctx.shadowColor = '#0ff';
-        ctx.shadowBlur = 20;
-        ctx.strokeStyle = 'rgba(0,255,255,0.9)';
-        ctx.lineWidth = 6;
-        ctx.strokeRect(3, 3, size - 6, size - 6);
-        ctx.restore();
-
-        // Food
-        if (food) {
-            const cx = food.x * cell + cell / 2;
-            const cy = food.y * cell + cell / 2;
-            const r = cell * 0.35;
-            ctx.save();
-            ctx.shadowColor = '#f0f';
-            ctx.shadowBlur = 25;
-            const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 2);
-            grad.addColorStop(0, '#ff80ff');
-            grad.addColorStop(1, '#ff00ff');
-            ctx.fillStyle = grad;
-            ctx.beginPath();
-            ctx.arc(cx, cy, r, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
-        }
-
-        // Power-up
-        if (powerUp) {
-            const cx = powerUp.x * cell + cell / 2;
-            const cy = powerUp.y * cell + cell / 2;
-            const r = cell * 0.32;
-            const pulse = 1 + Math.sin(performance.now() / 200) * 0.08;
-            ctx.save();
-            ctx.shadowColor = '#38bdf8';
-            ctx.shadowBlur = 30;
-            ctx.fillStyle = '#38bdf8';
-            ctx.beginPath();
-            ctx.arc(cx, cy, r * pulse, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.font = `${Math.floor(cell * 0.6)}px Orbitron`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('⚡', cx, cy + 1);
-            ctx.restore();
-        }
-
-        // Snake
-        for (let i = snake.length - 1; i >= 0; i--) {
-            const s = snake[i];
-            const x = s.x * cell;
-            const y = s.y * cell;
-            const pad = cell * 0.12;
-            ctx.save();
-            ctx.shadowColor = '#0ff';
-            ctx.shadowBlur = i === 0? 25 : 15;
-            const grad = ctx.createLinearGradient(x, y, x + cell, y + cell);
-            grad.addColorStop(0, i === 0? '#7df9ff' : '#00e5ff');
-            grad.addColorStop(1, i === 0? '#00e5ff' : '#00b8d9');
-            ctx.fillStyle = grad;
-            drawRoundedRect(x + pad, y + pad, cell - pad * 2, cell - pad * 2, cell * 0.25);
-            ctx.fill();
-            if (i === 0) {
-                ctx.fillStyle = '#00131a';
-                const eye = cell * 0.12;
-                ctx.beginPath();
-                ctx.arc(x + cell * 0.35, y + cell * 0.35, eye, 0, Math.PI * 2);
-                ctx.arc(x + cell * 0.65, y + cell * 0.35, eye, 0, Math.PI * 2);
-                ctx.fill();
-            }
-            ctx.restore();
-        }
+    if(state.power && nx===state.power.x && ny===state.power.y){
+      state.slowTimer = 5000;
+      powerBadge.classList.add('show');
+      state.power = null;
+      state.score += 25;
+      updateScore();
     }
 
-    function loop(now) {
-        if (gameState!== 'playing') return;
-        const dt = now - lastFrame;
-        lastFrame = now;
+    if(!ate){
+      state.snake.pop();
+    }
+  }
+  function update(dt){
+    if(!state.running) return;
 
-        // FPS counter
-        frames++;
-        fpsTimer += dt;
-        if (fpsTimer > 500) {
-            fpsEl.textContent = Math.round(frames * 1000 / fpsTimer) + ' FPS';
-            fpsTimer = 0;
-            frames = 0;
-        }
-
-        const slow = now < slowMoUntil;
-        if (!slow && gameWrapper.classList.contains('slow-active')) {
-            gameWrapper.classList.remove('slow-active');
-            slowBadge.classList.add('hidden');
-            slowBadge.classList.remove('flex');
-        }
-
-        const stepMs = slow? baseStepMs * 2 : baseStepMs;
-        if (now - lastStep >= stepMs) {
-            step();
-            lastStep = now;
-        }
-
-        maybeSpawnPowerUp(dt);
-        draw();
-        requestAnimationFrame(loop);
+    if(state.slowTimer > 0){
+      state.slowTimer -= dt;
+      if(state.slowTimer <= 0){
+        state.slowTimer = 0;
+        powerBadge.classList.remove('show');
+      }
+      powerBadge.textContent = `SLOW • ${(state.slowTimer/1000).toFixed(1)}s`;
     }
 
-    // Input
-    leftBtn.addEventListener('click', turnLeft);
-    rightBtn.addEventListener('click', turnRight);
-
-    let touchStart = null;
-    canvas.addEventListener('touchstart', e => {
-        const t = e.touches[0];
-        touchStart = { x: t.clientX, y: t.clientY, time: performance.now() };
-    }, { passive: true });
-
-    canvas.addEventListener('touchend', e => {
-        if (!touchStart) return;
-        const t = e.changedTouches[0];
-        const dx = t.clientX - touchStart.x;
-        const dy = t.clientY - touchStart.y;
-        const dist = Math.hypot(dx, dy);
-        if (dist < 20) {
-            touchStart = null;
-            return;
-        }
-        // Determine swipe direction relative to current heading
-        if (Math.abs(dx) > Math.abs(dy)) {
-            // Horizontal swipe
-            if (dir.y!== 0) setDirAbsolute(dx > 0? 1 : -1, 0);
-        } else {
-            if (dir.x!== 0) setDirAbsolute(0, dy > 0? 1 : -1);
-        }
-        touchStart = null;
-    }, { passive: true });
-
-    // Keyboard for desktop testing
-    window.addEventListener('keydown', e => {
-        if (e.key === 'ArrowLeft' || e.key.toLowerCase() === 'a') turnLeft();
-        if (e.key === 'ArrowRight' || e.key.toLowerCase() === 'd') turnRight();
-        if (e.key === ' ') {
-            if (gameState!== 'playing') startGame();
-        }
-    });
-
-    playBtn.addEventListener('click', startGame);
-    restartBtn.addEventListener('click', startGame);
-    menuBtn.addEventListener('click', () => {
-        gameOverScreen.classList.add('hidden');
-        gameOverScreen.classList.remove('flex');
-        startScreen.classList.remove('hidden');
-        gameState = 'menu';
-    });
-
-    // Init
-    function boot() {
-        resize();
-        draw();
-        gameState = 'menu';
+    if(state.power){
+      state.power.life -= dt;
+      if(state.power.life <= 0) state.power = null;
     }
-    window.addEventListener('resize', () => {
-        resize();
-        draw();
-    });
-    boot();
+
+    const movesPerSec = state.slowTimer > 0? 4 : 8;
+    acc += dt/1000 * movesPerSec;
+    while(acc >= 1){
+      step();
+      acc -= 1;
+      if(!state.running) break;
+    }
+  }
+
+  function drawRoundedRect(x,y,w,h,r){
+    ctx.beginPath();
+    ctx.moveTo(x+r,y);
+    ctx.arcTo(x+w,y,x+w,y+h,r);
+    ctx.arcTo(x+w,y+h,x,y+h,r);
+    ctx.arcTo(x,y+h,x,y,r);
+    ctx.arcTo(x,y,x+w,y,r);
+    ctx.closePath();
+  }
+
+  function render(time){
+    ctx.clearRect(0,0,size,size);
+
+    ctx.save();
+    ctx.globalAlpha = 0.06;
+    ctx.strokeStyle = '#00ffff';
+    ctx.lineWidth = 1;
+    for(let i=1;i<GRID;i++){
+      const p = i*cell;
+      ctx.beginPath();
+      ctx.moveTo(p,0);
+      ctx.lineTo(p,size);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(0,p);
+      ctx.lineTo(size,p);
+      ctx.stroke();
+    }
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = '#00ffff';
+    ctx.lineWidth = 4;
+    ctx.shadowColor = '#00ffff';
+    ctx.shadowBlur = 20;
+    ctx.strokeRect(2,2,size-4,size-4);
+    ctx.restore();
+
+    if(state.food){
+      const cx = (state.food.x + 0.5)*cell;
+      const cy = (state.food.y + 0.5)*cell;
+      const pulse = 0.35 + 0.07*Math.sin(time*0.01);
+      const r = cell*pulse;
+      ctx.save();
+      ctx.shadowColor = '#ff00ff';
+      ctx.shadowBlur = 25;
+      ctx.fillStyle = '#ff00ff';
+      ctx.beginPath();
+      ctx.arc(cx,cy,r,0,Math.PI*2);
+      ctx.fill();
+      ctx.shadowBlur = 8;
+      ctx.fillStyle = '#ffffff';
+      ctx.globalAlpha = 0.8;
+      ctx.beginPath();
+      ctx.arc(cx - r*0.3, cy - r*0.3, r*0.25,0,Math.PI*2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    if(state.power){
+      const cx = (state.power.x + 0.5)*cell;
+      const cy = (state.power.y + 0.5)*cell;
+      const pulse = 0.38 + 0.05*Math.sin(time*0.012);
+      const r = cell*pulse;
+      ctx.save();
+      ctx.shadowColor = '#0088ff';
+      ctx.shadowBlur = 30;
+      ctx.fillStyle = '#0088ff';
+      ctx.beginPath();
+      ctx.moveTo(cx, cy - r);
+      ctx.lineTo(cx + r, cy);
+      ctx.lineTo(cx, cy + r);
+      ctx.lineTo(cx - r, cy);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+
+    ctx.save();
+    for(let i=state.snake.length-1; i>=0; i--){
+      const s = state.snake[i];
+      const x = s.x*cell + CELL_BORDER;
+      const y = s.y*cell + CELL_BORDER;
+      const w = cell - CELL_BORDER*2;
+      const h = cell - CELL_BORDER*2;
+      const isHead = i===0;
+
+      ctx.shadowColor = '#00ffff';
+      ctx.shadowBlur = isHead? 25 : 15;
+      ctx.fillStyle = isHead? '#aaffff' : '#00eaff';
+      drawRoundedRect(x+1, y+1, w-2, h-2, 6);
+      ctx.fill();
+
+      ctx.shadowBlur = 0;
+      ctx.globalAlpha = 0.25;
+      ctx.fillStyle = '#ffffff';
+      drawRoundedRect(x+3, y+3, w-6, h-6, 4);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    }
+    const h = state.snake[0];
+    if(h){
+      const cx = (h.x + 0.5)*cell;
+      const cy = (h.y + 0.5)*cell;
+      const eyeDist = cell*0.18;
+      const dx = state.dir.x, dy = state.dir.y;
+      const px = -dy, py = dx;
+      ctx.fillStyle = '#001016';
+      ctx.beginPath();
+      ctx.arc(cx + dx*cell*0.1 + px*eyeDist, cy + dy*cell*0.1 + py*eyeDist, cell*0.07,0,Math.PI*2);
+      ctx.arc(cx + dx*cell*0.1 - px*eyeDist, cy + dy*cell*0.1 - py*eyeDist, cell*0.07,0,Math.PI*2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  function loop(t){
+    const dt = Math.min(50, t - lastTime);
+    lastTime = t;
+    update(dt);
+    render(t);
+    requestAnimationFrame(loop);
+  }
+
+  let touchStart = null;
+  canvas.addEventListener('touchstart', e=>{
+    if(!state.running) return;
+    const t = e.changedTouches[0];
+    touchStart = {x:t.clientX, y:t.clientY, time:performance.now()};
+  }, {passive:true});
+
+  canvas.addEventListener('touchend', e=>{
+    if(!touchStart ||!state.running) return;
+    const t = e.changedTouches[0];
+    const dx = t.clientX - touchStart.x;
+    const dy = t.clientY - touchStart.y;
+    const dist = Math.hypot(dx,dy);
+    if(dist < 24) { touchStart=null; return; }
+    if(Math.abs(dx) > Math.abs(dy)){
+      setDir(dx>0?1:-1,0);
+    }else{
+      setDir(0,dy>0?1:-1);
+    }
+    touchStart = null;
+  }, {passive:true});
+
+  let mouseDown = false, mdStart=null;
+  canvas.addEventListener('mousedown', e=>{
+    mouseDown = true;
+    mdStart = {x:e.clientX, y:e.clientY};
+  });
+  window.addEventListener('mouseup', e=>{
+    if(!mouseDown ||!mdStart ||!state.running) return;
+    const dx = e.clientX - mdStart.x;
+    const dy = e.clientY - mdStart.y;
+    if(Math.hypot(dx,dy) > 24){
+      if(Math.abs(dx) > Math.abs(dy)) setDir(dx>0?1:-1,0);
+      else setDir(0,dy>0?1:-1);
+    }
+    mouseDown = false;
+    mdStart = null;
+  });
+
+  leftBtn.addEventListener('click', ()=>{ if(state.running) turnLeft(); });
+  rightBtn.addEventListener('click', ()=>{ if(state.running) turnRight(); });
+
+  window.addEventListener('keydown', e=>{
+    if(!state.running && e.code==='Space'){
+      startGame();
+      return;
+    }
+    switch(e.key){
+      case 'ArrowUp': setDir(0,-1); break;
+      case 'ArrowDown': setDir(0,1); break;
+      case 'ArrowLeft': setDir(-1,0); break;
+      case 'ArrowRight': setDir(1,0); break;
+      case 'a': case 'A': turnLeft(); break;
+      case 'd': case 'D': turnRight(); break;
+    }
+  });
+
+  playBtn.addEventListener('click', startGame);
+  restartBtn.addEventListener('click', startGame);
+
+  resize();
+  window.addEventListener('resize', ()=>{
+    dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    resize();
+  });
+  resetGame();
+  requestAnimationFrame(loop);
 })();
 </script>
 </body>
-        </html>             
+</html>
